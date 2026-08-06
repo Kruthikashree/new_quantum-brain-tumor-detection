@@ -1,0 +1,49 @@
+.accuracy{
+
+    padding:80px;
+
+}
+
+.accuracy h2{
+
+    text-align:center;
+
+    margin-bottom:50px;
+
+    color:#1e3a8a;
+
+}
+
+.accuracy-box{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:80px;
+
+}
+
+.accuracy-box div{
+
+    width:300px;
+
+    padding:40px;
+
+    text-align:center;
+
+    border-radius:20px;
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.accuracy-box h1{
+
+    font-size:50px;
+
+    margin-top:20px;
+
+}

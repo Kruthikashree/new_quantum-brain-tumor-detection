@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.env
+
+# Dataset
+dataset/
+unseen_images/
+
+# NumPy Files
+*.npy
+
+# Trained Models
+*.pth
+*.keras
+*.h5
+
+# Pickle Files
+*.pkl
+
+# Results
+results/
+*.png
+
+# Zip Files
+*.zip
+
+# VS Code
+.vscode/
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db

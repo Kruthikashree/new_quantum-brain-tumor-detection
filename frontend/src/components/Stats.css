@@ -1,0 +1,41 @@
+.stats{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+padding:70px;
+
+background:white;
+
+gap:30px;
+
+}
+
+.stats div{
+
+text-align:center;
+
+padding:30px;
+
+background:#2563eb;
+
+border-radius:15px;
+
+color:white;
+
+}
+
+.stats h1{
+
+font-size:48px;
+
+}
+
+.stats p{
+
+margin-top:15px;
+
+font-size:18px;
+
+}
