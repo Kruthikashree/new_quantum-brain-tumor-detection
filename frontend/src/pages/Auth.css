@@ -1,0 +1,126 @@
+﻿.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7fbff;
+  padding: 40px 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 16px;
+  padding: 45px 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-card h1 {
+  font-size: 28px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 28px;
+}
+
+.auth-card label {
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.auth-card input {
+  padding: 13px 15px;
+  border: 1px solid #d7e0ec;
+  border-radius: 10px;
+  font-size: 15px;
+  margin-bottom: 20px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.auth-card input:focus {
+  border-color: #2563eb;
+}
+
+.role-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.role-option {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #d7e0ec;
+  border-radius: 10px;
+  background: white;
+  color: #555;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.role-option.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.auth-btn {
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.auth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 14px;
+  color: #555;
+}
+
+.auth-switch a {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.auth-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.auth-success {
+  background: #f0fdf4;
+  color: #15803d;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}

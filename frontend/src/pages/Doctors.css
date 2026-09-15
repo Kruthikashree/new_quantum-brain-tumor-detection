@@ -1,0 +1,89 @@
+﻿.doctors-page {
+  min-height: 100vh;
+  background: #f7fbff;
+  padding: 60px 90px;
+}
+
+.doctors-header {
+  margin-bottom: 40px;
+}
+
+.doctors-header h1 {
+  font-size: 30px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.doctors-header p {
+  color: #555;
+}
+
+.doctors-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  max-width: 900px;
+}
+
+.doctor-card {
+  background: white;
+  border-radius: 16px;
+  padding: 26px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.doctor-info h3 {
+  font-size: 18px;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.doctor-specialty {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.doctor-detail {
+  color: #64748b;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+
+.route-btn {
+  margin-top: 18px;
+  padding: 11px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.route-btn:hover {
+  background: #1d4ed8;
+}
+
+.route-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: white;
+  padding: 14px 26px;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 700px) {
+  .doctors-page {
+    padding: 40px 24px;
+  }
+}

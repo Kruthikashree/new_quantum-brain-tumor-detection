@@ -1,4 +1,4 @@
-import "./Hero.css";
+﻿import "./Hero.css";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -25,9 +25,10 @@ function Hero() {
 
                 <p>
 
-                    An intelligent healthcare platform powered by
-                    MobileNetV2 and Hybrid Quantum Neural Networks
-                    for accurate MRI-based brain tumor detection.
+                    A laboratory tool for uploading MRI scans and generating
+                    AI-assisted classification reports, powered by MobileNetV2
+                    and a Hybrid Quantum Neural Network, for physicians to
+                    review when planning patient treatment.
 
                 </p>
 

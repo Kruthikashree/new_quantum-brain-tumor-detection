@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+﻿from flask import Blueprint, request, jsonify
 from database.mongodb import users
 import bcrypt
 
@@ -16,9 +16,13 @@ def signup():
     name = data.get("name")
     email = data.get("email")
     password = data.get("password")
+    role = data.get("role")  # "lab" or "doctor"
 
-    if not name or not email or not password:
+    if not name or not email or not password or not role:
         return jsonify({"error": "All fields are required"}), 400
+
+    if role not in ("lab", "doctor"):
+        return jsonify({"error": "Role must be 'lab' or 'doctor'"}), 400
 
     existing = users.find_one({"email": email})
 
@@ -33,7 +37,8 @@ def signup():
     users.insert_one({
         "name": name,
         "email": email,
-        "password": hashed_password
+        "password": hashed_password,
+        "role": role
     })
 
     return jsonify({
@@ -68,7 +73,8 @@ def login():
 
         return jsonify({
             "message": "Login Successful",
-            "name": user["name"]
+            "name": user["name"],
+            "role": user.get("role", "lab")
         })
 
     return jsonify({

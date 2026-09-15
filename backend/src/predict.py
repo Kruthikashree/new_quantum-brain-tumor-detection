@@ -1,9 +1,10 @@
-"""
+﻿"""
 predict.py
 
 Predict Brain Tumor using Improved Hybrid Quantum Neural Network
 """
 
+import os
 import numpy as np
 import torch
 import joblib
@@ -17,6 +18,10 @@ from quantum_model import HybridQuantumClassifier
 # --------------------------------------------------
 # Configuration
 # --------------------------------------------------
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCALER_PATH = os.path.join(CURRENT_DIR, "scaler.pkl")
+MODEL_PATH = os.path.join(CURRENT_DIR, "quantum_model.pth")
 
 IMG_SIZE = 224
 
@@ -44,7 +49,7 @@ feature_extractor = MobileNetV2(
 # Load StandardScaler
 # --------------------------------------------------
 
-scaler = joblib.load("scaler.pkl")
+scaler = joblib.load(SCALER_PATH)
 
 # --------------------------------------------------
 # Load Hybrid Model
@@ -54,7 +59,7 @@ model = HybridQuantumClassifier().to(device)
 
 model.load_state_dict(
     torch.load(
-        "quantum_model.pth",
+        MODEL_PATH,
         map_location=device
     )
 )
@@ -78,22 +83,18 @@ def predict(image_path):
 
     img = preprocess_input(img)
 
-    # MobileNet Features
     features = feature_extractor.predict(
         img,
         verbose=0
     )
 
-    # StandardScaler
     features = scaler.transform(features)
 
-    # Convert to Torch
     features = torch.tensor(
         features,
         dtype=torch.float32
     ).to(device)
 
-    # Prediction
     with torch.no_grad():
 
         output = model(features)

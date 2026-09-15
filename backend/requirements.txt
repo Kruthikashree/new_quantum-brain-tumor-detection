@@ -1,0 +1,14 @@
+flask
+flask-cors
+pymongo
+bcrypt
+tensorflow
+torch
+pennylane
+scikit-learn
+joblib
+pillow
+opencv-python
+matplotlib
+seaborn
+numpy

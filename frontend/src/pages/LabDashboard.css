@@ -1,0 +1,205 @@
+﻿.lab-page {
+  min-height: 100vh;
+  background: #f7fbff;
+  padding: 50px 60px;
+}
+
+.lab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.lab-header h1 {
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.lab-header p {
+  color: #555;
+  margin-top: 6px;
+}
+
+.logout-btn {
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid #2563eb;
+  color: #2563eb;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #eff6ff;
+}
+
+.lab-form-card {
+  background: white;
+  border-radius: 20px;
+  padding: 36px;
+  max-width: 720px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+}
+
+.lab-form-card h2 {
+  font-size: 20px;
+  color: #0f172a;
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-field label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding: 11px 13px;
+  border: 1px solid #d7e0ec;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #2563eb;
+}
+
+.lab-dropzone {
+  border: 2px dashed #93c5fd;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  background: #f7fbff;
+}
+
+.lab-dropzone p {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.lab-preview-img {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.browse-btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: white;
+  border: 2px solid #2563eb;
+  color: #2563eb;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13.5px;
+}
+
+.browse-btn:hover {
+  background: #eff6ff;
+}
+
+.analyze-btn,
+.primary-btn {
+  width: 100%;
+  padding: 15px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.analyze-btn:hover:not(:disabled),
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+.analyze-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lab-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.access-code-card {
+  background: white;
+  border-radius: 20px;
+  padding: 50px;
+  max-width: 480px;
+  margin: 60px auto;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.access-code-card h1 {
+  font-size: 24px;
+  color: #0f172a;
+  margin-bottom: 14px;
+}
+
+.access-code-card p {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.access-code-display {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.access-code-note {
+  font-size: 13.5px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 700px) {
+  .lab-page {
+    padding: 30px 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

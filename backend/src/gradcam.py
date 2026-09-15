@@ -1,4 +1,4 @@
-"""
+﻿"""
 gradcam.py
 
 Grad-CAM Visualization for MobileNetV2
@@ -47,23 +47,35 @@ model = load_model(MODEL_PATH)
 print("Model Loaded Successfully!\n")
 
 # --------------------------------------------------------
-# Get MobileNet Backbone
+# Build a Grad-CAM model directly on the base_model's own
+# input/output graph, then re-apply the classifier head.
+#
+# NOTE: Reaching into an internal layer of a model that is
+# itself nested as a layer inside another functional model
+# (as MobileNetV2 is here) causes a "disconnected graph"
+# error in recent TF/Keras versions. Rebuilding the head on
+# base_model's own (already well-defined) input/output avoids
+# that entirely, since include_top=False means base_model's
+# own output IS already the last conv feature map.
 # --------------------------------------------------------
 
 base_model = model.layers[1]
 
-last_conv_layer = base_model.get_layer("Conv_1")
+gap_layer = model.layers[2]
+dense1_layer = model.layers[3]
+dropout_layer = model.layers[4]
+dense2_layer = model.layers[5]
 
-# --------------------------------------------------------
-# Build GradCAM Model
-# --------------------------------------------------------
+last_conv_output = base_model.output
+
+x = gap_layer(last_conv_output)
+x = dense1_layer(x)
+x = dropout_layer(x, training=False)
+predictions_tensor = dense2_layer(x)
 
 grad_model = Model(
-    inputs=model.input,
-    outputs=[
-        last_conv_layer.output,
-        model.output
-    ]
+    inputs=base_model.input,
+    outputs=[last_conv_output, predictions_tensor]
 )
 
 # --------------------------------------------------------
