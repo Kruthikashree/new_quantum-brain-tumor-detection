@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -23,9 +24,9 @@ unseen_images/
 # Pickle Files
 *.pkl
 
-# Results
+# Results (generated output only — not all PNGs)
 results/
-*.png
+backend/results/
 
 # Zip Files
 *.zip
@@ -33,11 +34,17 @@ results/
 # VS Code
 .vscode/
 
-# React
+# React / Node
 frontend/node_modules/
 frontend/dist/
+node_modules/
+
+# Logs
+*.log
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Uploads (patient MRI scans — never commit real/test patient data)
 backend/uploads/

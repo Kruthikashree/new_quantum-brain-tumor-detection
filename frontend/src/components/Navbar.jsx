@@ -1,28 +1,55 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser, logout } from "../services/api";
 import "./Navbar.css";
 
 function Navbar() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    navigate("/");
+  };
+
+  const dashboardPath = user?.role === "doctor" ? "/doctor-dashboard" : "/dashboard";
+
   return (
     <nav className="navbar">
       <div className="logo">
-        🧠 Quantum Brain AI
+        <span className="logo-icon">🧠</span> Quantum Brain AI
       </div>
 
       <div className="nav-links">
         <Link to="/">Home</Link>
-        <Link to="/upload">Predict</Link>
-        <Link to="/doctors">Doctors</Link>
-        <Link to="/history">History</Link>
+        {user && <Link to={dashboardPath}>Dashboard</Link>}
       </div>
 
       <div className="auth-buttons">
-        <Link to="/login">
-          <button className="login-btn">Login</button>
-        </Link>
-
-        <Link to="/signup">
-          <button className="signup-btn">Sign Up</button>
-        </Link>
+        {user ? (
+          <>
+            <Link to={dashboardPath}>
+              <button className="login-btn">{user.name}</button>
+            </Link>
+            <button className="signup-btn" onClick={handleLogout}>
+              Log Out
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">
+              <button className="login-btn">Login</button>
+            </Link>
+            <Link to="/signup">
+              <button className="signup-btn">Sign Up</button>
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

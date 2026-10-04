@@ -2,55 +2,100 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:18px 60px;
-    background:white;
-    box-shadow:0 2px 12px rgba(0,0,0,.08);
+    padding:16px 60px;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(12px);
+    box-shadow:0 1px 0 rgba(15,23,42,.06), 0 4px 20px rgba(15,23,42,.04);
     position:sticky;
     top:0;
     z-index:100;
 }
 
 .logo{
-    font-size:26px;
-    font-weight:bold;
-    color:#2563eb;
+    font-size:22px;
+    font-weight:800;
+    color:#0f172a;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    letter-spacing:-0.3px;
+}
+
+.logo-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    border-radius:11px;
+    background:linear-gradient(135deg,#2563eb,#06b6d4,#c026d3);
+    font-size:18px;
 }
 
 .nav-links{
     display:flex;
-    gap:35px;
+    gap:32px;
 }
 
 .nav-links a{
-    color:#333;
+    color:#475569;
     font-weight:600;
+    font-size:14.5px;
+    text-decoration:none;
+    transition:color .2s;
+    position:relative;
 }
 
-.nav-links a:hover{
-    color:#2563eb;
+.nav-links a::after{
+    content:"";
+    position:absolute;
+    left:0; bottom:-6px;
+    width:0; height:2px;
+    background:linear-gradient(90deg,#2563eb,#06b6d4);
+    transition:width .2s;
 }
+
+.nav-links a:hover{ color:#2563eb; }
+.nav-links a:hover::after{ width:100%; }
 
 .auth-buttons{
     display:flex;
-    gap:15px;
+    gap:12px;
 }
 
 .login-btn{
     background:white;
-    border:2px solid #2563eb;
+    border:1.5px solid #dbeafe;
     color:#2563eb;
-    padding:10px 22px;
-    border-radius:8px;
+    padding:9px 20px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:.2s;
 }
 
+.login-btn:hover{ border-color:#2563eb; background:#f0f9ff; }
+
 .signup-btn{
-    background:#2563eb;
+    background:linear-gradient(135deg,#2563eb,#06b6d4);
     color:white;
     border:none;
-    padding:10px 22px;
-    border-radius:8px;
+    padding:9px 22px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(37,99,235,.3);
+    transition:.2s;
 }
 
 .signup-btn:hover{
-    background:#1d4ed8;
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(37,99,235,.4);
+}
+
+@media (max-width:1000px){
+    .nav-links{ display:none; }
+    .navbar{ padding:14px 24px; }
 }

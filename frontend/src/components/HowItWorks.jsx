@@ -4,56 +4,30 @@ import { FaUpload, FaBrain, FaAtom, FaNotesMedical } from "react-icons/fa";
 function HowItWorks() {
 
   const steps = [
-    {
-      icon: <FaUpload />,
-      title: "Upload MRI",
-      desc: "Upload a brain MRI scan in JPG, JPEG, or PNG format."
-    },
-    {
-      icon: <FaBrain />,
-      title: "Feature Extraction",
-      desc: "MobileNetV2 extracts high-level image features from the MRI."
-    },
-    {
-      icon: <FaAtom />,
-      title: "Hybrid Quantum AI",
-      desc: "A Hybrid Quantum Neural Network classifies the extracted features."
-    },
-    {
-      icon: <FaNotesMedical />,
-      title: "Prediction",
-      desc: "The system predicts the tumor class with confidence and suggestions."
-    }
+    { icon: <FaUpload />, title: "Upload MRI", desc: "Upload a brain MRI image." },
+    { icon: <FaBrain />, title: "Feature Extraction", desc: "MobileNetV2 extracts important visual features." },
+    { icon: <FaAtom />, title: "Hybrid Quantum AI", desc: "The extracted features are processed by the hybrid quantum-classical model." },
+    { icon: <FaNotesMedical />, title: "Prediction", desc: "The system generates the predicted tumor class and confidence information." }
   ];
 
   return (
-    <section className="workflow">
-
-      <h2>How Our AI Works</h2>
+    <section className="workflow" id="how-it-works">
+      <h2>From MRI Scan to AI-Assisted Prediction</h2>
+      <p className="subtitle">Four stages transform an MRI image into a model prediction</p>
 
       <div className="workflow-container">
-
         {steps.map((step, index) => (
-
           <div className="workflow-card" key={index}>
-
-            <div className="workflow-icon">
-              {step.icon}
-            </div>
-
+            <span className="workflow-num">0{index + 1}</span>
+            <div className="workflow-icon">{step.icon}</div>
             <h3>{step.title}</h3>
-
             <p>{step.desc}</p>
-
+            {index < steps.length - 1 && <div className="workflow-connector"><span></span></div>}
           </div>
-
         ))}
-
       </div>
-
     </section>
   );
-
 }
 
 export default HowItWorks;

@@ -18,7 +18,7 @@ function Login() {
 
     try {
       const data = await login(email, password);
-      saveCurrentUser({ name: data.name, email, role: data.role });
+            saveCurrentUser({ name: data.name, email: data.email, role: data.role, token: data.token });
 
       if (data.role === "doctor") {
         navigate("/doctor-dashboard");
@@ -51,7 +51,7 @@ function Login() {
           required
         />
 
-        <label>Password</label>
+                <label>Password</label>
         <input
           type="password"
           value={password}
@@ -59,6 +59,9 @@ function Login() {
           placeholder="••••••••"
           required
         />
+        <p className="auth-switch" style={{ marginTop: -8, textAlign: "right" }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
 
         <button type="submit" className="auth-btn" disabled={loading}>
           {loading ? "Logging in..." : "Log In"}

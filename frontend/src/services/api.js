@@ -6,6 +6,20 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
+// Attach the login token to every request
+api.interceptors.request.use((config) => {
+  const stored = localStorage.getItem("user");
+  if (stored) {
+    try {
+      const { token } = JSON.parse(stored);
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    } catch (e) {
+      // ignore a corrupted value
+    }
+  }
+  return config;
+});
+
 export const signup = async (name, email, password, role) => {
   const response = await api.post("/signup", { name, email, password, role });
   return response.data;
@@ -74,4 +88,76 @@ export const listPatients = async () => {
   return response.data;
 };
 
+export const verifySignup = async (email, code) => {
+  const response = await api.post("/verify-signup", { email, code });
+  return response.data;
+};
+
+export const resendCode = async (email) => {
+  const response = await api.post("/resend-code", { email });
+  return response.data;
+};
+
+export const createReport = async (formData, onUploadProgress) => {
+  const response = await api.post("/reports", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress,
+  });
+  return response.data;
+};
+
+export const listReports = async () => {
+  const response = await api.get("/reports");
+  return response.data;
+};
+
+export const getReport = async (id) => {
+  const response = await api.get(`/reports/${id}`);
+  return response.data;
+};
+
+export const lookupReport = async (code) => {
+  const response = await api.post("/reports/lookup", { code });
+  return response.data;
+};
+
+export const downloadReportPdf = async (id) => {
+  const response = await api.get(`/reports/${id}/pdf`, { responseType: "blob" });
+  return response.data;
+};
+
+export const resendReportEmails = async (id) => {
+  const response = await api.post(`/reports/${id}/resend`);
+  return response.data;
+};
+
+// If the session expired or is invalid, go back to login
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url = error.config?.url || "";
+    if (error.response?.status === 401 && !url.includes("/login")) {
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+); 
+export const forgotPassword = async (email) => {
+  const response = await api.post("/forgot-password", { email });
+  return response.data;
+};
+
+export const resetPassword = async (email, code, newPassword) => {
+  const response = await api.post("/reset-password", {
+    email,
+    code,
+    new_password: newPassword,
+  });
+  return response.data;
+};
+export const generateReportResult = async (id) => {
+  const response = await api.post(`/reports/${id}/generate-result`);
+  return response.data;
+};
 export default api;
