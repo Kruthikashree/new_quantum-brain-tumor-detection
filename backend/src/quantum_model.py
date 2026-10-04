@@ -14,7 +14,7 @@ import pennylane as qml
 
 NUM_QUBITS = 4
 
-dev = qml.device("default.qubit", wires=NUM_QUBITS)
+dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
 
 # ---------------------------------------------------
 # Quantum Circuit

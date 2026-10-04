@@ -8,25 +8,12 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 from predict import feature_extractor, scaler, model, device, CLASS_NAMES, IMG_SIZE
 
-PATCH_SIZE = 32
-STRIDE = 32
+PATCH_SIZE = 74
+STRIDE = 74
 OCCLUSION_COLOR = 0
 
 
-def _predict_confidence(img_array_uint8, target_class_index):
-    arr = img_array_uint8.astype("float32")
-    arr = np.expand_dims(arr, axis=0)
-    arr = preprocess_input(arr)
 
-    features = feature_extractor.predict(arr, verbose=0)
-    features = scaler.transform(features)
-    features_t = torch.tensor(features, dtype=torch.float32).to(device)
-
-    with torch.no_grad():
-        output = model(features_t)
-        probabilities = torch.softmax(output, dim=1)
-
-    return probabilities[0, target_class_index].item()
 
 
 def generate_explanation(image_path):
@@ -34,6 +21,7 @@ def generate_explanation(image_path):
     img = keras_image.load_img(image_path, target_size=(IMG_SIZE, IMG_SIZE))
     img_array = keras_image.img_to_array(img).astype("uint8")
 
+    # --- Baseline prediction ---
     arr = img_array.astype("float32")
     arr = np.expand_dims(arr, axis=0)
     arr = preprocess_input(arr)
@@ -48,21 +36,35 @@ def generate_explanation(image_path):
         predicted_class = torch.argmax(probabilities, dim=1).item()
         baseline_conf = probabilities[0, predicted_class].item()
 
+    # --- Build ALL occluded versions up front ---
+    positions = list(range(0, IMG_SIZE - PATCH_SIZE + 1, STRIDE))
+    coords = [(y, x) for y in positions for x in positions]
+
+    batch = np.zeros((len(coords), IMG_SIZE, IMG_SIZE, 3), dtype="uint8")
+    for i, (y, x) in enumerate(coords):
+        occ = img_array.copy()
+        occ[y:y+PATCH_SIZE, x:x+PATCH_SIZE, :] = OCCLUSION_COLOR
+        batch[i] = occ
+
+    # --- ONE batched call through MobileNet instead of N separate calls ---
+    batch_arr = preprocess_input(batch.astype("float32"))
+    batch_features = feature_extractor.predict(batch_arr, verbose=0, batch_size=len(coords))
+    batch_features = scaler.transform(batch_features)
+    batch_features_t = torch.tensor(batch_features, dtype=torch.float32).to(device)
+
+    with torch.no_grad():
+        batch_output = model(batch_features_t)
+        batch_probs = torch.softmax(batch_output, dim=1)
+        occluded_confs = batch_probs[:, predicted_class].cpu().numpy()
+
+    # --- Build heatmap from the batched results ---
     heatmap = np.zeros((IMG_SIZE, IMG_SIZE), dtype=np.float32)
     count_map = np.zeros((IMG_SIZE, IMG_SIZE), dtype=np.float32)
 
-    positions = list(range(0, IMG_SIZE - PATCH_SIZE + 1, STRIDE))
-
-    for y in positions:
-        for x in positions:
-            occluded = img_array.copy()
-            occluded[y:y+PATCH_SIZE, x:x+PATCH_SIZE, :] = OCCLUSION_COLOR
-
-            occluded_conf = _predict_confidence(occluded, predicted_class)
-            drop = baseline_conf - occluded_conf
-
-            heatmap[y:y+PATCH_SIZE, x:x+PATCH_SIZE] += drop
-            count_map[y:y+PATCH_SIZE, x:x+PATCH_SIZE] += 1
+    for (y, x), occluded_conf in zip(coords, occluded_confs):
+        drop = baseline_conf - float(occluded_conf)
+        heatmap[y:y+PATCH_SIZE, x:x+PATCH_SIZE] += drop
+        count_map[y:y+PATCH_SIZE, x:x+PATCH_SIZE] += 1
 
     count_map[count_map == 0] = 1
     heatmap = heatmap / count_map
