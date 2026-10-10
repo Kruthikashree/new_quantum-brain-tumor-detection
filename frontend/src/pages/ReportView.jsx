@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-import HeatmapExplorer from "../components/HeatmapExplorer";
 import PortalLayout from "../components/PortalLayout";
-import {
-  getReport, generateReportResult, getCurrentUser,
-} from "../services/api";
-
+import HeatmapExplorer from "../components/HeatmapExplorer";
+import { getReport, downloadReportPdf, getCurrentUser } from "../services/api";
 
 const TUMOR_COLORS = {
   Glioma: "#dc2626",
@@ -27,13 +23,6 @@ function formatScanDate(value) {
     return value;
   }
 }
-const ANALYSIS_STEPS = [
-  "Extracting MRI features...",
-  "Running hybrid quantum circuit...",
-  "Classifying tumor type...",
-  "Generating explainability heatmap...",
-  "Finalizing report...",
-];
 
 function ReportView() {
   const { id } = useParams();
@@ -41,17 +30,6 @@ function ReportView() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
-  const [analyzing, setAnalyzing] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
-
-  useEffect(() => {
-    if (!analyzing) return;
-    setStepIndex(0);
-    const interval = setInterval(() => {
-      setStepIndex((i) => Math.min(i + 1, ANALYSIS_STEPS.length - 1));
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [analyzing]);
 
   useEffect(() => {
     getReport(id)
@@ -59,27 +37,26 @@ function ReportView() {
       .catch((err) => setError(err.response?.data?.error || "Could not load the report."));
   }, [id]);
 
+  
 
-
-  const handleGenerate = async () => {
-    setAnalyzing(true);
+  const download = async () => {
     setError("");
     try {
-      const data = await generateReportResult(report.id);
-      setReport(data.report);
-      setNote("AI analysis generated.");
-    } catch (err) {
-      setError(err.response?.data?.error || "AI analysis failed. Please try again.");
-    } finally {
-      setAnalyzing(false);
+      const blob = await downloadReportPdf(report.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MRI_Report_${report.referral_code}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Could not download the report.");
     }
   };
 
   const tumor = report?.result?.tumor;
   const color = TUMOR_COLORS[tumor] || "#2563eb";
   const isLab = user?.role === "lab";
-  const isDoctor = user?.role === "doctor";
-  const analyzed = report?.status === "analyzed" && report?.result;
 
   return (
     <PortalLayout title="MRI Analysis Report" subtitle="AI-assisted analysis for physician review">
@@ -109,93 +86,101 @@ function ReportView() {
             )}
           </div>
 
-          
-
-          {!isLab && (
+          {isLab && (
             <div className="pt-card">
-              <h2>AI analysis</h2>
+              <h2>Referral code</h2>
+              <div className="pt-code">{report.referral_code}</div>
 
-              {!analyzed ? (
-                <>
-                  <p className="pt-muted">
-                    {isDoctor
-                      ? "The AI analysis has not been generated yet."
-                      : "The AI analysis is not available."}
-                  </p>
-                  {isDoctor && (
-                    <>
-                      <button className="pt-btn pt-btn-primary" onClick={handleGenerate} disabled={analyzing}>
-                        {analyzing ? "Analyzing..." : "Generate Result"}
-                      </button>
-
-                      {analyzing && (
-                        <div className="analysis-progress">
-                          <div className="analysis-bar">
-                            <div
-                              className="analysis-bar-fill"
-                              style={{ width: `${((stepIndex + 1) / ANALYSIS_STEPS.length) * 100}%` }}
-                            ></div>
-                          </div>
-                          <p className="analysis-status">{ANALYSIS_STEPS[stepIndex]}</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="result-hero" style={{ borderColor: color + "40", background: color + "0d" }}>
-                    <div className="result-hero-label">AI Prediction</div>
-                    <div className="result-hero-badge" style={{ background: color + "20", color }}>
-                      {tumor || "-"}
-                    </div>
-                    
-                  </div>
-                  <div className="pt-images">
-                    {report.mri_image && (
-                      <div><small>MRI scan</small><img src={report.mri_image} alt="MRI scan" /></div>
-                    )}                    
-                    {report.result.heatmap && (
-                      <div>
-                        <div className="heatmap-title-row">
-                          <small>Grad-CAM style explainability heatmap</small>
-                          <span className="heatmap-info-icon">
-                            ⓘ
-                            <div className="heatmap-tooltip">
-                              <p className="heatmap-tooltip-note">
-                                Highlighted regions show where the AI focused
-                                when making this prediction — not a confirmed
-                                tumor location.
-                              </p>
-                              <div className="legend-item">
-                                <span className="legend-swatch" style={{ background: "linear-gradient(135deg,#ef4444,#f97316)" }}></span>
-                                High influence (warm)
-                              </div>
-                              <div className="legend-item">
-                                <span className="legend-swatch" style={{ background: "#eab308" }}></span>
-                                Moderate influence
-                              </div>
-                              <div className="legend-item">
-                                <span className="legend-swatch" style={{ background: "linear-gradient(135deg,#3b82f6,#60a5fa)" }}></span>
-                                Low influence (cool)
-                              </div>
-                            </div>
-                          </span>
-                        </div>
-                        <HeatmapExplorer src={report.result.heatmap} alt="Regions that influenced the prediction" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-disclaimer">
-                    This is an AI-generated analysis intended to assist, not replace,
-                    clinical judgment. It is not a confirmed diagnosis. Final
-                    interpretation remains with the reviewing physician.
-                  </div>
-                </>
-              )}
+              <p className="pt-muted">
+                Doctor email: {report.email_status?.doctor ? "sent" : "not sent"} ·
+                Patient email: {report.email_status?.patient ? "sent" : "not sent"}
+              </p>
             </div>
           )}
+          <div className="pt-card">
+            <h2>AI analysis</h2>
+
+            {report.result ? (
+              <>
+                                <div className="result-hero" style={{ borderColor: color + "40", background: color + "0d" }}>
+                  <div className="result-hero-label">AI PREDICTION</div>
+                  <div className="result-hero-badge" style={{ background: color + "20", color }}>
+                    {tumor || "-"}
+                  </div>
+
+                  {report.result.probabilities && (
+                    <div className="prob-breakdown">
+                      {Object.entries(report.result.probabilities)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([label, pct]) => (
+                          <div className="prob-row" key={label}>
+                            <span className="prob-label">{label}</span>
+                            <div className="prob-track">
+                              <div
+                                className="prob-fill"
+                                style={{
+                                  width: `${pct}%`,
+                                  background: TUMOR_COLORS[label] || "#2563eb",
+                                }}
+                              />
+                            </div>
+                            <span className="prob-pct">{pct}%</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-images">
+                  {report.mri_image && (
+                    <div><small>MRI scan</small><img src={report.mri_image} alt="MRI scan" /></div>
+                  )}
+                  {report.result.heatmap && (
+                    <div>
+                      <div className="heatmap-title-row">
+                        <small>Grad-CAM style explainability heatmap</small>
+                        <span className="heatmap-info-icon">
+                          ⓘ
+                          <div className="heatmap-tooltip">
+                            <p className="heatmap-tooltip-note">
+                              Highlighted regions show where the AI focused
+                              when making this prediction — not a confirmed
+                              tumor location.
+                            </p>
+                            <div className="legend-item">
+                              <span className="legend-swatch" style={{ background: "linear-gradient(135deg,#ef4444,#f97316)" }}></span>
+                              High influence (warm)
+                            </div>
+                            <div className="legend-item">
+                              <span className="legend-swatch" style={{ background: "#eab308" }}></span>
+                              Moderate influence
+                            </div>
+                            <div className="legend-item">
+                              <span className="legend-swatch" style={{ background: "linear-gradient(135deg,#3b82f6,#60a5fa)" }}></span>
+                              Low influence (cool)
+                            </div>
+                          </div>
+                        </span>
+                      </div>
+                      <HeatmapExplorer src={report.result.heatmap} alt="Regions that influenced the prediction" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-disclaimer">
+                  This is an AI-generated analysis intended to assist, not replace,
+                  clinical judgment. It is not a confirmed diagnosis. Final
+                  interpretation remains with the reviewing physician.
+                </div>
+              </>
+            ) : (
+              <p className="pt-muted">AI analysis is not available for this report.</p>
+            )}
+
+            <div className="pt-actions" style={{ marginTop: 16 }}>
+              <button className="pt-btn pt-btn-primary" onClick={download}>Download Report</button>
+            </div>
+          </div>
         </>
       )}
     </PortalLayout>

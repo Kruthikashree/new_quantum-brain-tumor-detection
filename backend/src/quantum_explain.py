@@ -13,9 +13,6 @@ STRIDE = 74
 OCCLUSION_COLOR = 0
 
 
-
-
-
 def generate_explanation(image_path):
 
     img = keras_image.load_img(image_path, target_size=(IMG_SIZE, IMG_SIZE))
@@ -35,6 +32,7 @@ def generate_explanation(image_path):
         probabilities = torch.softmax(output, dim=1)
         predicted_class = torch.argmax(probabilities, dim=1).item()
         baseline_conf = probabilities[0, predicted_class].item()
+        all_probs = probabilities[0].cpu().numpy().tolist()
 
     # --- Build ALL occluded versions up front ---
     positions = list(range(0, IMG_SIZE - PATCH_SIZE + 1, STRIDE))
@@ -89,9 +87,13 @@ def generate_explanation(image_path):
 
     tumor = CLASS_NAMES[predicted_class]
     confidence = round(baseline_conf * 100, 2)
+    probability_breakdown = {
+        CLASS_NAMES[i]: round(p * 100, 2) for i, p in enumerate(all_probs)
+    }
 
     return {
         "tumor": tumor,
         "confidence": confidence,
-        "heatmap": heatmap_data_uri
+        "heatmap": heatmap_data_uri,
+        "probabilities": probability_breakdown
     }

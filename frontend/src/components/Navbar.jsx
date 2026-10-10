@@ -25,10 +25,7 @@ function Navbar() {
         <span className="logo-icon">🧠</span> Quantum Brain AI
       </div>
 
-      <div className="nav-links">
-        <Link to="/">Home</Link>
-        {user && <Link to={dashboardPath}>Dashboard</Link>}
-      </div>
+      
 
       <div className="auth-buttons">
         {user ? (

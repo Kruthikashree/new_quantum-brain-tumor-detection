@@ -77,6 +77,7 @@ function ForgotPassword() {
     return (
       <div className="auth-page">
         <form className="auth-card" onSubmit={handleReset}>
+          <Link to="/" className="auth-back">← Back to Home</Link>
           <h1>Reset Password</h1>
           <p className="auth-subtitle">
             Enter the 6-digit code sent to {email}, then choose a new password
@@ -158,6 +159,7 @@ function ForgotPassword() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleRequest}>
+        <Link to="/" className="auth-back">← Back to Home</Link>
         <h1>Forgot Password</h1>
         <p className="auth-subtitle">
           Enter your account email and we'll send you a reset code

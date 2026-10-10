@@ -2,24 +2,21 @@
 import { Link } from "react-router-dom";
 import PortalLayout from "../components/PortalLayout";
 import ReportsTable from "../components/ReportsTable";
-import { listReports, getCurrentUser } from "../services/api";
+import { DistributionChart, WeeklyChart } from "../components/DashboardCharts";
+import { listReports, getReportStats, getCurrentUser } from "../services/api";
 
 function LabDashboard() {
   const user = getCurrentUser();
   const [reports, setReports] = useState([]);
+  const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    listReports()
-      .then(setReports)
-      .catch((err) => setError(err.response?.data?.error || "Could not load reports."));
+    listReports().then(setReports).catch(() => {});
+    getReportStats()
+      .then(setStats)
+      .catch((err) => setError(err.response?.data?.error || "Could not load dashboard stats."));
   }, []);
-
-  const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
-  const thisWeek = reports.filter((r) => new Date(r.created_at).getTime() >= weekAgo).length;
-  const undelivered = reports.filter(
-    (r) => !r.email_status?.doctor || !r.email_status?.patient
-  ).length;
 
   return (
     <PortalLayout
@@ -29,11 +26,26 @@ function LabDashboard() {
     >
       {error && <div className="pt-alert">{error}</div>}
 
-      <div className="pt-stats">
-        <div className="pt-stat"><b>{reports.length}</b><span>Total reports</span></div>
-        <div className="pt-stat"><b>{thisWeek}</b><span>Last 7 days</span></div>
-        <div className="pt-stat"><b>{undelivered}</b><span>With undelivered emails</span></div>
-      </div>
+      {stats && (
+        <>
+          <div className="pt-stats">
+            <div className="pt-stat"><b>{stats.total}</b><span>Total reports</span></div>
+            <div className="pt-stat"><b>{stats.last_7_days}</b><span>Last 7 days</span></div>
+            <div className="pt-stat"><b>{stats.pending_email}</b><span>Pending email delivery</span></div>
+          </div>
+
+          <div className="pt-grid-2" style={{ marginBottom: 20 }}>
+            <div className="pt-card">
+              <h2>Prediction distribution</h2>
+              <DistributionChart distribution={stats.distribution} />
+            </div>
+            <div className="pt-card">
+              <h2>Reports this week</h2>
+              <WeeklyChart weekly={stats.weekly} />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="pt-card">
         <h2>Generate MRI Report</h2>

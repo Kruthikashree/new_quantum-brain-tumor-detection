@@ -4,11 +4,13 @@ import PortalLayout from "../components/PortalLayout";
 import { createReport } from "../services/api";
 
 const LANGUAGES = ["English", "Kannada", "Hindi", "Telugu", "Tamil", "Malayalam", "Marathi", "Other"];
-const STEPS = ["Uploading MRI", "Saving Record", "Generating Referral Code", "Sending Notifications", "Complete"];
-const REQUIRED = [
-  "patient_name", "patient_id", "patient_age", "patient_gender",
-  "patient_email", "patient_phone", "preferred_language",
-  "doctor_name", "doctor_email", "hospital", "scan_date",
+const ANALYSIS_STEPS = [
+  "Uploading MRI",
+  "Preprocessing",
+  "Running AI analysis",
+  "Generating explainability heatmap",
+  "Finalizing report & sending notifications",
+  "Complete",
 ];
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -18,8 +20,11 @@ const nowLocal = () => {
   return d.toISOString().slice(0, 16);
 };
 
+const WIZARD_STEPS = ["Patient", "Doctor", "MRI Upload", "Review", "Result"];
+
 function GenerateReport() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0); // 0..3 wizard, 4 = analyzing/result
   const [form, setForm] = useState({
     patient_name: "", patient_id: "", patient_age: "", patient_gender: "Male",
     patient_email: "", patient_phone: "", preferred_language: "English",
@@ -29,7 +34,8 @@ function GenerateReport() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [consent, setConsent] = useState(false);
-  const [stage, setStage] = useState(-1);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisStage, setAnalysisStage] = useState(0);
   const [error, setError] = useState("");
   const timers = useRef([]);
   const uploadDone = useRef(false);
@@ -51,21 +57,40 @@ function GenerateReport() {
     setPreview(URL.createObjectURL(selected));
   };
 
-  const valid =
-    REQUIRED.every((k) => String(form[k]).trim()) &&
-    EMAIL_RE.test(form.patient_email.trim()) &&
-    EMAIL_RE.test(form.doctor_email.trim()) &&
-    file &&
-    consent;
+  // Per-step validation
+  const patientValid =
+    form.patient_name.trim() && form.patient_id.trim() && String(form.patient_age).trim() &&
+    EMAIL_RE.test(form.patient_email.trim()) && form.patient_phone.trim();
 
-  const busy = stage >= 0;
+  const doctorValid =
+    form.doctor_name.trim() && EMAIL_RE.test(form.doctor_email.trim()) && form.hospital.trim();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!valid || busy) return;
+  const uploadValid = !!file && form.scan_date.trim();
+
+  const reviewValid = consent;
+
+  const stepValid = [patientValid, doctorValid, uploadValid, reviewValid][step];
+
+  const goNext = () => {
+    setError("");
+    if (!stepValid) {
+      setError("Please complete all required fields before continuing.");
+      return;
+    }
+    setStep((s) => Math.min(s + 1, 3));
+  };
+  const goBack = () => {
+    setError("");
+    setStep((s) => Math.max(s - 1, 0));
+  };
+
+  const handleSubmit = async () => {
+    if (!reviewValid) return;
 
     setError("");
-    setStage(0);
+    setStep(4);
+    setAnalyzing(true);
+    setAnalysisStage(0);
     uploadDone.current = false;
 
     const fd = new FormData();
@@ -77,32 +102,33 @@ function GenerateReport() {
       const data = await createReport(fd, (ev) => {
         if (!uploadDone.current && ev.total && ev.loaded >= ev.total) {
           uploadDone.current = true;
-          setStage(1);
-          timers.current.push(setTimeout(() => setStage(2), 500));
+          setAnalysisStage(1);
+          timers.current.push(setTimeout(() => setAnalysisStage(2), 2000));
+          timers.current.push(setTimeout(() => setAnalysisStage(3), 14000));
+          timers.current.push(setTimeout(() => setAnalysisStage(4), 22000));
         }
       });
 
       timers.current.forEach(clearTimeout);
-      setStage(3);
-      timers.current = [
-        setTimeout(() => setStage(4), 500),
-        setTimeout(() => navigate(`/reports/${data.report.id}`), 1100),
-      ];
+      setAnalysisStage(5);
+      timers.current = [setTimeout(() => navigate(`/reports/${data.report.id}`), 900)];
     } catch (err) {
       timers.current.forEach(clearTimeout);
-      setStage(-1);
+      setAnalyzing(false);
+      setStep(3);
       setError(err.response?.data?.error || "Report generation failed. Please try again.");
     }
   };
 
-  if (busy) {
+  // ---------- Step 5: analysis progress ----------
+  if (step === 4) {
     return (
-      <PortalLayout role="lab" title="Generating report" subtitle="Please keep this page open">
+      <PortalLayout role="lab" title="Generating report" subtitle="Please keep this page open — AI analysis is running">
         <div className="pt-card">
           <ul className="pt-steps">
-            {STEPS.map((label, i) => (
-              <li key={label} className={i < stage || stage === 4 ? "done" : i === stage ? "active" : ""}>
-                <span>{i < stage || stage === 4 ? "✓" : i + 1}</span>
+            {ANALYSIS_STEPS.map((label, i) => (
+              <li key={label} className={i < analysisStage || analysisStage === 5 ? "done" : i === analysisStage ? "active" : ""}>
+                <span>{i < analysisStage || analysisStage === 5 ? "✓" : i + 1}</span>
                 {label}
               </li>
             ))}
@@ -114,9 +140,21 @@ function GenerateReport() {
 
   return (
     <PortalLayout role="lab" title="Generate MRI Report" subtitle="Enter patient, doctor and MRI details">
-      <form onSubmit={handleSubmit}>
-        {error && <div className="pt-alert">{error}</div>}
+      <div className="pt-card">
+        <ol className="wizard-progress">
+          {WIZARD_STEPS.slice(0, 4).map((label, i) => (
+            <li key={label} className={i === step ? "active" : i < step ? "done" : ""}>
+              <span className="wizard-dot">{i < step ? "✓" : i + 1}</span>
+              {label}
+            </li>
+          ))}
+        </ol>
+      </div>
 
+      {error && <div className="pt-alert">{error}</div>}
+
+      {/* Step 0: Patient */}
+      {step === 0 && (
         <div className="pt-card">
           <h2>Patient information</h2>
           <div className="pt-grid-3">
@@ -131,9 +169,21 @@ function GenerateReport() {
             </div>
             <div className="pt-field"><label>Patient Email *</label><input type="email" value={form.patient_email} onChange={set("patient_email")} /></div>
             <div className="pt-field"><label>Patient Phone Number *</label><input type="tel" value={form.patient_phone} onChange={set("patient_phone")} /></div>
+            <div className="pt-field">
+              <label>Preferred Language *</label>
+              <select value={form.preferred_language} onChange={set("preferred_language")}>
+                {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="pt-actions" style={{ justifyContent: "flex-end" }}>
+            <button className="pt-btn pt-btn-primary" onClick={goNext} disabled={!patientValid}>Next: Doctor</button>
           </div>
         </div>
+      )}
 
+      {/* Step 1: Doctor */}
+      {step === 1 && (
         <div className="pt-card">
           <h2>Doctor information</h2>
           <div className="pt-grid-2">
@@ -142,8 +192,15 @@ function GenerateReport() {
             <div className="pt-field"><label>Hospital / Clinic Name *</label><input value={form.hospital} onChange={set("hospital")} /></div>
             <div className="pt-field"><label>Doctor ID (optional)</label><input value={form.doctor_id} onChange={set("doctor_id")} /></div>
           </div>
+          <div className="pt-actions" style={{ justifyContent: "space-between" }}>
+            <button className="pt-btn pt-btn-outline" onClick={goBack}>Back</button>
+            <button className="pt-btn pt-btn-primary" onClick={goNext} disabled={!doctorValid}>Next: MRI Upload</button>
+          </div>
         </div>
+      )}
 
+      {/* Step 2: MRI Upload */}
+      {step === 2 && (
         <div className="pt-card">
           <h2>MRI information</h2>
           <div className="pt-grid-2">
@@ -173,16 +230,55 @@ function GenerateReport() {
             </div>
           </div>
 
+          <div className="pt-actions" style={{ justifyContent: "space-between" }}>
+            <button className="pt-btn pt-btn-outline" onClick={goBack}>Back</button>
+            <button className="pt-btn pt-btn-primary" onClick={goNext} disabled={!uploadValid}>Next: Review</button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Review + Consent */}
+      {step === 3 && (
+        <div className="pt-card">
+          <h2>Review before generating</h2>
+
+          <div className="pt-detail" style={{ marginBottom: 16 }}>
+            <div><span>Patient</span><b>{form.patient_name} ({form.patient_id})</b></div>
+            <div><span>Age / Gender</span><b>{form.patient_age} / {form.patient_gender}</b></div>
+            <div><span>Patient contact</span><b>{form.patient_email} · {form.patient_phone}</b></div>
+            <div><span>Preferred language</span><b>{form.preferred_language}</b></div>
+            <div><span>Doctor</span><b>{form.doctor_name}</b></div>
+            <div><span>Doctor email</span><b>{form.doctor_email}</b></div>
+            <div><span>Hospital</span><b>{form.hospital}</b></div>
+            <div><span>Scan date & time</span><b>{new Date(form.scan_date).toLocaleString()}</b></div>
+          </div>
+
+          {preview && (
+            <div style={{ marginBottom: 16 }}>
+              <small className="pt-muted">MRI preview</small>
+              <img src={preview} alt="MRI preview" style={{ maxWidth: 220, borderRadius: 10, display: "block", marginTop: 6 }} />
+            </div>
+          )}
+
+          {form.clinical_notes && (
+            <p style={{ marginBottom: 16 }}>
+              <span className="pt-muted">Clinical notes: </span>{form.clinical_notes}
+            </p>
+          )}
+
           <label className="pt-consent">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             Patient consent has been obtained for digital processing and report sharing.
           </label>
 
-          <button type="submit" className="pt-btn pt-btn-primary" disabled={!valid}>
-            Generate Report
-          </button>
+          <div className="pt-actions" style={{ justifyContent: "space-between" }}>
+            <button className="pt-btn pt-btn-outline" onClick={goBack}>Back</button>
+            <button className="pt-btn pt-btn-primary" onClick={handleSubmit} disabled={!reviewValid}>
+              Generate Report
+            </button>
+          </div>
         </div>
-      </form>
+      )}
     </PortalLayout>
   );
 }

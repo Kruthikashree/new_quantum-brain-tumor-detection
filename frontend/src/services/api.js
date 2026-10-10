@@ -160,4 +160,8 @@ export const generateReportResult = async (id) => {
   const response = await api.post(`/reports/${id}/generate-result`);
   return response.data;
 };
+export const getReportStats = async () => {
+  const response = await api.get("/reports/stats");
+  return response.data;
+};
 export default api;

@@ -6,7 +6,7 @@ import time
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
-
+from datetime import timedelta
 from bson import ObjectId
 from bson.errors import InvalidId
 from flask import Blueprint, request, jsonify, g, send_file
@@ -60,7 +60,6 @@ def _load(report_id):
 
 
 def _is_assigned(report):
-    """Lab owner, or the doctor this report's Doctor Email matches."""
     user = g.user
     if user["role"] == "lab":
         return report.get("lab_id") == user["sub"]
@@ -70,7 +69,7 @@ def _is_assigned(report):
 
 
 def _can_access(report):
-    """Full access check: assigned AND (for doctors) already unlocked via code."""
+    """Lab: owns it. Doctor: assigned AND has unlocked it with the referral code."""
     user = g.user
     if user["role"] == "lab":
         return report.get("lab_id") == user["sub"]
@@ -90,7 +89,10 @@ def _image_data_url(path):
         return None
 
 
-def serialize(r, detail=False, hide_result=False):
+def serialize(r, detail=False):
+    """Everyone who can access a report (lab owner, or a doctor who has
+    unlocked it) now sees the AI result — results are generated at
+    creation time, not withheld by role."""
     result = r.get("result") or {}
     out = {
         "id": str(r["_id"]),
@@ -102,22 +104,25 @@ def serialize(r, detail=False, hide_result=False):
         "created_at": r["created_at"].isoformat(),
         "email_status": r.get("email_status"),
         "status": r.get("status", "pending"),
+                "result": {
+            "tumor": result.get("tumor"),
+            "confidence": result.get("confidence"),
+            "probabilities": result.get("probabilities"),
+        } if result else None,
     }
-
-    if hide_result:
-        out["result"] = None
-    else:
-        out["result"] = {"tumor": result.get("tumor"), "confidence": result.get("confidence")} if result else None
 
     if detail:
         out["clinical_notes"] = r.get("clinical_notes", "")
         out["mri_image"] = _image_data_url(r["image_path"])
-        if not hide_result and result:
+        if result:
             out["result"]["heatmap"] = result.get("heatmap")
 
     return out
 
 
+# ------------------------------------------------------------
+# Lab: create a report AND run the AI analysis immediately
+# ------------------------------------------------------------
 @report_bp.route("/reports", methods=["POST"])
 @require_auth("lab")
 def create_report():
@@ -174,6 +179,14 @@ def create_report():
     image_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}{ext}")
     file.save(image_path)
 
+    # Run the AI pipeline right now, as part of report creation
+    try:
+        result = explain_image(image_path)
+    except Exception as e:
+        print("AI analysis error:", e)
+        os.remove(image_path)
+        return jsonify({"error": "AI analysis failed. Please try again."}), 500
+
     doc = {
         "lab_id": g.user["sub"],
         "lab_name": g.user["name"],
@@ -195,8 +208,10 @@ def create_report():
         "scan_date": val("scan_date"),
         "clinical_notes": val("clinical_notes"),
         "image_path": image_path,
-        "result": None,
-        "status": "pending",
+        "result": result,
+        "status": "analyzed",
+        "analyzed_at": datetime.now(timezone.utc),
+        "analyzed_by": g.user["email"],
         "consent": {"given": True, "at": datetime.now(timezone.utc)},
         "created_at": datetime.now(timezone.utc),
         "email_status": {"doctor": False, "patient": False},
@@ -213,48 +228,12 @@ def create_report():
     reports.update_one({"_id": report_id}, {"$set": {"email_status": status}})
     doc["email_status"] = status
 
-    return jsonify({"message": "Report generated", "report": serialize(doc, detail=True, hide_result=True)})
+    return jsonify({"message": "Report generated", "report": serialize(doc, detail=True)})
 
 
-@report_bp.route("/reports/<report_id>/generate-result", methods=["POST"])
-@require_auth("doctor")
-def generate_result(report_id):
-    user_id = g.user["sub"]
-    if _too_many_failures(user_id):
-        return jsonify({"error": "Too many attempts. Please try again in a few minutes."}), 429
-
-    report = _load(report_id)
-    if report is None:
-        _failed[user_id].append(time.time())
-        return jsonify({"error": "Report not found"}), 404
-
-    if not _can_access(report):
-        _failed[user_id].append(time.time())
-        return jsonify({"error": "You are not authorized to access this report."}), 403
-
-    if report.get("status") == "analyzed" and report.get("result"):
-        return jsonify({"message": "Result already generated", "report": serialize(report, detail=True)})
-
-    try:
-        result = explain_image(report["image_path"])
-    except Exception as e:
-        print("AI analysis error:", e)
-        return jsonify({"error": "AI analysis failed. Please try again."}), 500
-
-    reports.update_one(
-        {"_id": report["_id"]},
-        {"$set": {
-            "result": result,
-            "status": "analyzed",
-            "analyzed_at": datetime.now(timezone.utc),
-            "analyzed_by": g.user["email"],
-        }},
-    )
-    report = _load(report_id)
-
-    return jsonify({"message": "Result generated successfully", "report": serialize(report, detail=True)})
-
-
+# ------------------------------------------------------------
+# Lab / Doctor: history
+# ------------------------------------------------------------
 @report_bp.route("/reports", methods=["GET"])
 @require_auth("lab", "doctor")
 def list_reports():
@@ -264,9 +243,12 @@ def list_reports():
     else:
         query = {"doctor.email": g.user["email"], "unlocked_by": g.user["email"]}
     rows = reports.find(query).sort("created_at", -1).limit(200)
-    return jsonify([serialize(r, hide_result=is_lab) for r in rows])
+    return jsonify([serialize(r) for r in rows])
 
 
+# ------------------------------------------------------------
+# Lab / Doctor: one report (owner, or a doctor who has unlocked it)
+# ------------------------------------------------------------
 @report_bp.route("/reports/<report_id>", methods=["GET"])
 @require_auth("lab", "doctor")
 def get_report(report_id):
@@ -275,10 +257,12 @@ def get_report(report_id):
         return jsonify({"error": "Report not found"}), 404
     if not _can_access(report):
         return jsonify({"error": "You are not authorized to access this report."}), 403
-    hide_result = g.user["role"] == "lab"
-    return jsonify(serialize(report, detail=True, hide_result=hide_result))
+    return jsonify(serialize(report, detail=True))
 
 
+# ------------------------------------------------------------
+# Doctor: unlock a report with a referral code
+# ------------------------------------------------------------
 @report_bp.route("/reports/lookup", methods=["POST"])
 @require_auth("doctor")
 def lookup_report():
@@ -309,6 +293,9 @@ def lookup_report():
     return jsonify(serialize(report, detail=True))
 
 
+# ------------------------------------------------------------
+# Lab / Doctor: PDF download (full report, including the AI section)
+# ------------------------------------------------------------
 @report_bp.route("/reports/<report_id>/pdf", methods=["GET"])
 @require_auth("lab", "doctor")
 def report_pdf(report_id):
@@ -317,11 +304,47 @@ def report_pdf(report_id):
         return jsonify({"error": "Report not found"}), 404
     if not _can_access(report):
         return jsonify({"error": "You are not authorized to access this report."}), 403
-    include_result = g.user["role"] == "doctor"
-    pdf = build_pdf(report, include_result=include_result)
+    pdf = build_pdf(report, include_result=True)
     return send_file(
         io.BytesIO(pdf),
         mimetype="application/pdf",
         as_attachment=True,
         download_name=f"MRI_Report_{report['referral_code']}.pdf",
     )
+from datetime import timedelta
+
+@report_bp.route("/reports/stats", methods=["GET"])
+@require_auth("lab")
+def report_stats():
+    lab_reports = list(reports.find({"lab_id": g.user["sub"]}))
+
+    total = len(lab_reports)
+    week_ago = datetime.now() - timedelta(days=7)
+    last_7_days = sum(1 for r in lab_reports if r["created_at"] >= week_ago)
+    pending_email = sum(
+        1 for r in lab_reports
+        if not (r.get("email_status", {}).get("doctor") and r.get("email_status", {}).get("patient"))
+    )
+
+    distribution = {"Glioma": 0, "Meningioma": 0, "Pituitary": 0, "No Tumor": 0}
+    for r in lab_reports:
+        tumor = (r.get("result") or {}).get("tumor")
+        if tumor in distribution:
+            distribution[tumor] += 1
+
+    daily = {}
+    for i in range(6, -1, -1):
+        day = (datetime.now() - timedelta(days=i)).date().isoformat()
+        daily[day] = 0
+    for r in lab_reports:
+        day = r["created_at"].date().isoformat()
+        if day in daily:
+            daily[day] += 1
+
+    return jsonify({
+        "total": total,
+        "last_7_days": last_7_days,
+        "pending_email": pending_email,
+        "distribution": distribution,
+        "weekly": [{"date": d, "count": c} for d, c in daily.items()],
+    })

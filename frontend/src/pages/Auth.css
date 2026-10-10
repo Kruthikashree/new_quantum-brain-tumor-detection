@@ -140,3 +140,15 @@
   cursor: pointer;
   font: inherit;
 }
+.auth-back {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.auth-back:hover {
+  color: #2563eb;
+}

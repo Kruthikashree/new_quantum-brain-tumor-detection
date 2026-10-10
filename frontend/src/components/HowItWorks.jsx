@@ -5,9 +5,9 @@ function HowItWorks() {
 
   const steps = [
     { icon: <FaUpload />, title: "Upload MRI", desc: "Upload a brain MRI image." },
-    { icon: <FaBrain />, title: "Feature Extraction", desc: "MobileNetV2 extracts important visual features." },
-    { icon: <FaAtom />, title: "Hybrid Quantum AI", desc: "The extracted features are processed by the hybrid quantum-classical model." },
-    { icon: <FaNotesMedical />, title: "Prediction", desc: "The system generates the predicted tumor class and confidence information." }
+    { icon: <FaBrain />, title: "Feature Extraction", desc: "MobileNetV2 extracts the relevant visual features." },
+    { icon: <FaAtom />, title: "Hybrid Quantum-Classical Model", desc: "The extracted features are processed through the implemented hybrid model." },
+    { icon: <FaNotesMedical />, title: "Prediction & Explanation", desc: "The system displays the predicted tumor class with a Grad-CAM style explanation." }
   ];
 
   return (
@@ -22,7 +22,6 @@ function HowItWorks() {
             <div className="workflow-icon">{step.icon}</div>
             <h3>{step.title}</h3>
             <p>{step.desc}</p>
-            {index < steps.length - 1 && <div className="workflow-connector"><span></span></div>}
           </div>
         ))}
       </div>

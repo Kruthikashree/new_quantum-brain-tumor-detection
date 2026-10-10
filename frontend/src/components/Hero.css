@@ -225,3 +225,36 @@
     .hero-buttons, .hero-checklist{ justify-content:center; }
     .mri-panel{ max-width:100%; }
 }
+
+.mri-caption {
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.mri-toggle {
+    margin-left: auto;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.mri-toggle:hover { background: #dbeafe; }
+
+.mri-scan.heatmap-mode {
+    background: radial-gradient(circle at 50% 40%, #1a0f3a, #04101f 80%);
+}
+
+.heat-zone {
+    position: absolute; top: 36%; left: 32%;
+    width: 110px; height: 90px;
+    background: radial-gradient(circle, rgba(239,68,68,.65), rgba(234,179,8,.4) 55%, rgba(59,130,246,.25) 80%, transparent);
+    border-radius: 50%;
+    filter: blur(2px);
+}

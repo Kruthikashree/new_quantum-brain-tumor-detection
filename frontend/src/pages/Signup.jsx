@@ -149,6 +149,7 @@ function Signup() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
+        <Link to="/" className="auth-back">← Back to Home</Link>
         <h1>Create Account</h1>
         <p className="auth-subtitle">Sign up to get started</p>
 

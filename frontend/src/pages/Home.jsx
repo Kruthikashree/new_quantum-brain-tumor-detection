@@ -1,4 +1,7 @@
 ﻿import Navbar from "../components/Navbar";
+import SectionNav from "../components/SectionNav";
+
+
 import Hero from "../components/Hero";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
@@ -9,6 +12,7 @@ function Home() {
   return (
     <>
       <Navbar />
+      <SectionNav />
       <Hero />
       <Features />
       <HowItWorks />
