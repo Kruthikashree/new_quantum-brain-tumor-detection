@@ -1,280 +1,418 @@
-Quantum Enhanced Deep Learning for Brain Tumor Detection
+# 🧠 Quantum Enhanced Deep Learning for Brain Tumor Detection
 
-A hybrid quantum-classical deep learning system for automated brain tumor detection and classification from MRI scans using MobileNetV2, PennyLane, and PyTorch.
+### A Hybrid Quantum-Classical Deep Learning Framework for Brain MRI Classification
 
-The system combines transfer learning and quantum machine learning to classify brain MRI images into four categories while providing explainable AI visualizations through occlusion-based heatmaps. Built as a full-stack web application, it enables secure report generation, doctor referrals, and PDF-based diagnostic reports.
+An intelligent brain tumor detection system that combines **MobileNetV2, Quantum Machine Learning, and Explainable AI** to classify brain MRI scans into four categories. The system integrates a quantum-enhanced deep learning pipeline with a secure full-stack web application for MRI analysis, report generation, and doctor referrals.
 
-📌 Table of Contents
-Overview
-Problem Statement
-Proposed Solution
-Key Features
-System Architecture
-Classification Pipeline
-Technology Stack
-Dataset
-Model Performance
-Application Workflow
-Installation
-Project Structure
-Future Scope
-Authors
-📖 Overview
+---
 
-Brain tumor detection from MRI scans is challenging due to variations in tumor size, shape, and location. Traditional CNN-based systems often struggle with complex tumor boundaries and may require significant computational resources.
+## 📌 Table of Contents
 
-This project introduces a Hybrid Quantum-Classical Deep Learning Framework that combines:
+1. [Overview](#-overview)
+2. [Problem Statement](#-problem-statement)
+3. [Proposed Solution](#-proposed-solution)
+4. [Key Features](#-key-features)
+5. [System Architecture](#-system-architecture)
+6. [Classification Pipeline](#-classification-pipeline)
+7. [Technology Stack](#-technology-stack)
+8. [Dataset](#-dataset)
+9. [Model Performance](#-model-performance)
+10. [Application Workflow](#-application-workflow)
+11. [Installation and Setup](#-installation-and-setup)
+12. [Project Structure](#-project-structure)
+13. [Future Enhancements](#-future-enhancements)
+14. [Authors](#-authors)
+15. [Disclaimer](#-disclaimer)
 
-MobileNetV2 Transfer Learning
-Quantum Neural Networks
-Explainable AI
-Secure Web-Based Report Management
+---
 
-The goal is to improve classification accuracy while maintaining interpretability and usability in healthcare environments.
+## 📖 Overview
 
-🎯 Problem Statement
+Brain tumor detection from Magnetic Resonance Imaging (MRI) scans is a challenging task due to variations in tumor size, shape, texture, and location. Conventional deep learning approaches can identify tumor patterns, but their decision-making processes may be difficult to interpret.
 
-Most brain tumor classification systems:
+To address these challenges, this project introduces a **Hybrid Quantum-Classical Deep Learning Framework** that combines the feature extraction capabilities of MobileNetV2 with quantum-based feature refinement using PennyLane.
 
-Rely purely on classical deep learning
-Provide limited explainability
-Lack secure clinical report management
-Do not explore quantum-enhanced feature refinement
+The proposed system also incorporates Explainable AI techniques to generate occlusion-based heatmaps, helping users visualize the image regions that influence the model's predictions.
 
-This project addresses these limitations by integrating a quantum refinement layer into a deep learning pipeline and delivering results through a secure web application.
+A full-stack web application provides an integrated platform for MRI classification, secure user authentication, patient report management, and doctor referral access.
 
-💡 Proposed Solution
+## 🎯 Problem Statement
 
-The proposed system:
+Existing brain tumor classification systems often face several limitations:
 
-Accepts Brain MRI scans.
-Extracts features using MobileNetV2.
-Reduces features using a classical neural network.
-Refines features through a 4-qubit quantum circuit built using PennyLane.
-Predicts the tumor category.
-Generates an explainable heatmap showing influential image regions.
-Creates a secure report accessible by assigned doctors through referral codes.
-✨ Key Features
+- Dependence on conventional classical deep learning architectures.
+- Limited interpretability of model predictions.
+- Difficulty understanding which image regions influence classification.
+- Lack of integrated and secure medical report management.
+- Limited exploration of quantum machine learning for feature refinement.
 
-✅ Brain MRI Classification
+This project aims to address these challenges through a hybrid quantum-classical architecture combined with an explainable and secure web-based application.
 
-Glioma
-Meningioma
-Pituitary Tumor
-No Tumor
+## 💡 Proposed Solution
 
-✅ Hybrid Quantum-Classical Deep Learning
+The proposed system follows a hybrid AI pipeline to analyze brain MRI images.
 
-✅ Explainable AI Heatmaps
+1. Accepts brain MRI images through a web-based interface.
+2. Validates and preprocesses the uploaded images.
+3. Extracts visual features using MobileNetV2.
+4. Reduces the extracted features using a classical neural network.
+5. Processes the reduced features through a 4-qubit quantum circuit implemented using PennyLane.
+6. Uses a classification head to predict the brain tumor category.
+7. Generates occlusion-based heatmaps to explain influential image regions.
+8. Generates PDF-based diagnostic reports.
+9. Provides secure report access to assigned doctors through referral codes.
 
-✅ OTP-Based Authentication
+## ✨ Key Features
 
-✅ Doctor Referral Access System
+### 🧠 AI-Based Brain Tumor Classification
 
-✅ PDF Report Generation
+Classifies brain MRI images into four categories:
 
-✅ Role-Based Access Control
+- Glioma
+- Meningioma
+- Pituitary Tumor
+- No Tumor
 
-✅ Report History & Dashboard Analytics
+### ⚛️ Hybrid Quantum-Classical Learning
 
-✅ Email Notifications with Referral Codes
+- MobileNetV2-based feature extraction.
+- Classical neural network for feature reduction.
+- 4-qubit quantum refinement circuit.
+- Quantum-enhanced classification pipeline.
 
-🏗️ System Architecture
-Plain Text
-React Frontend
-│
-▼
-Flask Backend
-│
-┌─────────┴─────────┐
-▼ ▼
-MongoDB AI Pipeline
-│
-MobileNetV2 Feature Extractor
-│
-Feature Reduction
-│
-Quantum Layer
-│
-Classification Head
-│
-Prediction
-│
-Explainability Module
-🧠 Classification Pipeline
-Plain Text
-MRI Scan
-│
-▼
-Image Validation
-│
-▼
-Preprocessing
-│
-▼
-MobileNetV2 Feature Extraction
-│
-▼
-Classical Feature Reduction
-│
-▼
-4-Qubit Quantum Refinement Layer
-│
-▼
-Classification Head
-│
-▼
-Prediction
-│
-▼
-Heatmap Generation
-🧰 Technology Stack
-Frontend
-React
-JavaScript
-HTML
-CSS
-Vite
-Backend
-Flask
-Python
-Database
-MongoDB
-Deep Learning
-TensorFlow / Keras
-PyTorch
-MobileNetV2
-Quantum Computing
-PennyLane
-Lightning Qubit Simulator
-Other Tools
-Pillow
-ReportLab
-JWT
-bcrypt
-SMTP Email Services
+### 🔍 Explainable AI
 
-📊 Dataset
+- Occlusion-based heatmap generation.
+- Visual representation of influential image regions.
+- Improved interpretability of model predictions.
 
-Brain Tumor MRI Dataset (Kaggle)
+### 🔐 Secure Web Application
 
-Classes:
+- User registration and email OTP verification.
+- Secure login and authentication.
+- Role-based access control.
+- Patient and doctor information management.
 
-Glioma
-Meningioma
-Pituitary Tumor
-No Tumor
+### 📄 Report Management
 
-Dataset Size:
+- Automated PDF report generation.
+- Report history and dashboard analytics.
+- Doctor referral access using unique referral codes.
+- Email notifications containing referral information.
 
-Type	ImagesTraining	5,600
-Testing	1,600
+## 🏗️ System Architecture
 
-Images are resized to 224×224 before classification.
+The application follows a modular architecture consisting of a React frontend, Flask backend, MongoDB database, and hybrid AI processing pipeline.
 
-📈 Model Performance
-Model	Validation AccuracyCNN (From Scratch)	65.94%
-MobileNetV2	88.81%
-MobileNetV2 + Quantum Layer	92.81%
+```text
+                 React Frontend
+                       |
+                       v
+                  Flask Backend
+                       |
+          +------------+------------+
+          |                         |
+          v                         v
+      MongoDB                  AI Pipeline
+                                    |
+                                    v
+                         MobileNetV2 Feature
+                              Extraction
+                                    |
+                                    v
+                          Classical Feature
+                              Reduction
+                                    |
+                                    v
+                           Quantum Layer
+                          (4-Qubit Circuit)
+                                    |
+                                    v
+                           Classification
+                                  Head
+                                    |
+                                    v
+                               Prediction
+                                    |
+                                    v
+                          Explainability
+                              Module
+                                    |
+                                    v
+                          Heatmap Generation
+```
 
-The hybrid model achieved the highest classification accuracy among all tested approaches.
+## 🧠 Classification Pipeline
 
-🔄 Application Workflow
-Plain Text
-User Registration
-│
-▼
-Email OTP Verification
-│
-▼
-Login
-│
-▼
-Patient & Doctor Details
-│
-▼
-MRI Upload
-│
-▼
-AI Analysis
-│
-▼
-Prediction + Heatmap
-│
-▼
-Report Generation
-│
-▼
-Referral Code Email
-│
-▼
-Doctor Access & PDF Download
-⚙️ Installation
-Clone Repository
-Shell
-git clone https://github.com/your-username/quantum-brain-tumor-detection.git
-cd quantum-brain-tumor-detection
-Backend
-Shell
+The hybrid classification process consists of the following stages:
+
+```text
+             Brain MRI Image
+                    |
+                    v
+              Image Upload
+                    |
+                    v
+              Image Validation
+                    |
+                    v
+               Preprocessing
+              (224 x 224)
+                    |
+                    v
+          MobileNetV2 Feature Extraction
+                    |
+                    v
+           Classical Feature Reduction
+                    |
+                    v
+          4-Qubit Quantum Refinement
+                    |
+                    v
+             Classification Head
+                    |
+                    v
+             Predicted Category
+                    |
+                    v
+            Explainability Module
+                    |
+                    v
+           Occlusion-Based Heatmap
+```
+
+## 🧰 Technology Stack
+
+| Component | Technologies |
+|---|---|
+| Frontend | React, JavaScript, HTML, CSS, Vite |
+| Backend | Python, Flask |
+| Database | MongoDB |
+| Deep Learning | TensorFlow, Keras, PyTorch |
+| Feature Extraction | MobileNetV2 |
+| Quantum Computing | PennyLane, Lightning Qubit Simulator |
+| Explainable AI | Occlusion-Based Heatmaps |
+| Authentication | JWT, bcrypt, Email OTP |
+| Image Processing | Pillow |
+| PDF Generation | ReportLab |
+| Communication | SMTP Email Services |
+
+## 📊 Dataset
+
+The project uses a **Brain Tumor MRI Dataset from Kaggle**, containing MRI images belonging to four classification categories.
+
+| Dataset Category | Number of Images |
+|---|---:|
+| Training | 5,600 |
+| Testing | 1,600 |
+| **Total** | **7,200** |
+
+### Classification Categories
+
+- Glioma
+- Meningioma
+- Pituitary Tumor
+- No Tumor
+
+All MRI images are resized to **224 × 224 pixels** before being passed to the classification pipeline.
+
+## 📈 Model Performance
+
+Three different approaches were evaluated to compare their validation accuracy.
+
+| Model Architecture | Validation Accuracy |
+|---|---:|
+| CNN (From Scratch) | 65.94% |
+| MobileNetV2 | 88.81% |
+| MobileNetV2 + Quantum Layer | **92.81%** |
+
+### Performance Comparison
+
+The MobileNetV2 model enhanced with the quantum refinement layer achieved the highest reported validation accuracy among the evaluated approaches.
+
+This demonstrates the potential of combining classical deep learning with quantum machine learning for brain MRI classification.
+
+## 🔄 Application Workflow
+
+The web application provides an end-to-end workflow for users and doctors.
+
+```text
+                 User Registration
+                        |
+                        v
+                Email OTP Verification
+                        |
+                        v
+                       Login
+                        |
+                        v
+             Patient and Doctor Details
+                        |
+                        v
+                   MRI Upload
+                        |
+                        v
+                  AI Analysis
+                        |
+                        v
+              Tumor Classification
+                        |
+                        v
+               Heatmap Generation
+                        |
+                        v
+                PDF Report Creation
+                        |
+                        v
+             Referral Code via Email
+                        |
+                        v
+               Doctor Report Access
+                        |
+                        v
+                 PDF Download
+```
+
+## ⚙️ Installation and Setup
+
+Follow the steps below to run the project locally.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Kruthikashree/new_quantum-brain-tumor-detection.git
+```
+
+```bash
+cd new_quantum-brain-tumor-detection
+```
+
+### 2. Backend Setup
+
+Navigate to the backend directory:
+
+```bash
 cd backend
+```
+
+Create and activate a Python virtual environment:
+
+**Windows:**
+
+```bash
+python -m venv bt
+bt\Scripts\activate
+```
+
+Install the required dependencies:
+
+```bash
 pip install -r requirements.txt
+```
+
+Start the Flask backend:
+
+```bash
 python app.py
+```
 
-Backend:
+Backend URL:
 
-Plain Text
+```text
 http://127.0.0.1:5000
-Frontend
-Shell
+```
+
+### 3. Frontend Setup
+
+Open a new terminal and navigate to the frontend directory:
+
+```bash
 cd frontend
+```
+
+Install the Node.js dependencies:
+
+```bash
 npm install
+```
+
+Start the React development server:
+
+```bash
 npm run dev
+```
 
-Frontend:
+Frontend URL:
 
-Plain Text
+```text
 http://localhost:5173
-📁 Project Structure
-Plain Text
-quantum-brain-tumor-detection
+```
+
+### 4. Environment Configuration
+
+Configure the required environment variables for services such as MongoDB, email authentication, JWT, and other application settings.
+
+Do not upload passwords, API keys, database credentials, or secret keys to GitHub. Use environment variables and keep sensitive configuration in a `.env` file excluded through `.gitignore`.
+
+## 📁 Project Structure
+
+```text
+new_quantum-brain-tumor-detection/
 │
 ├── backend/
-│ ├── app.py
-│ ├── routes/
-│ ├── models/
-│ └── requirements.txt
+│   ├── app.py
+│   ├── routes/
+│   ├── services/
+│   ├── database/
+│   ├── src/
+│   ├── requirements.txt
+│   └── ...
 │
 ├── frontend/
-│ ├── src/
-│ ├── public/
-│ └── package.json
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
 │
-├── trained_models/
-├── dataset/
-└── README.md
-🔮 Future Scope
-Independent clinical validation
-Tumor segmentation
-Larger MRI datasets
-Multilingual reports
-PACS integration
-Cloud deployment
-Enhanced explainability methods
+├── README.md
+└── ...
+```
 
-👨‍💻 Authors
-Kruthikashree T
-Manya C
-Poojashree S
+*Note: This is a simplified representation of the main project directories.*
 
-Guide: Mr. Kamleshwar Kumar Yadav
+## 🔮 Future Enhancements
 
-Department of Computer Science & Engineering
- Global Academy of Technology, Bengaluru.
+The project can be extended through the following improvements:
 
-⚠️ Disclaimer
+- Clinical validation using larger and more diverse MRI datasets.
+- Integration of tumor segmentation techniques.
+- Evaluation across additional quantum circuit architectures.
+- Multilingual diagnostic reports.
+- Integration with Picture Archiving and Communication Systems (PACS).
+- Improved explainability using additional XAI techniques.
+- Scalable cloud deployment and performance optimization.
 
-This project is developed for academic and research purposes only and should not be used as a substitute for professional medical diagnosis.
+## 👨‍💻 Authors
 
-🚀 Hybrid AI + Quantum Computing for Smarter Brain Tumor Detection 🧠⚛️
+**Kruthikashree T**  
+**Manya C**  
+**Poojashree S**
 
-This style looks professional on GitHub, is concise, and is similar in structure to the Smart Campus README without being unnecessarily long.
+**Project Guide:** Mr. Kamleshwar Kumar Yadav
+
+Department of Computer Science and Engineering  
+Global Academy of Technology, Bengaluru.
+
+## ⚠️ Disclaimer
+
+This project is developed strictly for academic and research purposes. The predictions generated by the system are experimental and should not be considered a substitute for professional medical diagnosis, clinical evaluation, or advice from qualified healthcare professionals.
+
+---
+
+<p align="center">
+  <b>🚀 Hybrid AI + Quantum Computing for Smarter Brain Tumor Detection 🧠⚛️</b>
+</p>
+
+<p align="center">
+  <i>Exploring the potential of quantum-enhanced deep learning in medical image analysis.</i>
+</p>
