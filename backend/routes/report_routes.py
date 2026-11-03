@@ -104,10 +104,11 @@ def serialize(r, detail=False):
         "created_at": r["created_at"].isoformat(),
         "email_status": r.get("email_status"),
         "status": r.get("status", "pending"),
-                "result": {
+       "result": {
             "tumor": result.get("tumor"),
             "confidence": result.get("confidence"),
             "probabilities": result.get("probabilities"),
+            "focus_region": result.get("focus_region"),
         } if result else None,
     }
 

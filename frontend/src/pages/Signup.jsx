@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signup, verifySignup, resendCode } from "../services/api";
+import AuthLayout from "../components/AuthLayout";
 import "./Auth.css";
 
 function Signup() {
@@ -80,7 +81,7 @@ function Signup() {
   // ---------- Verify screen ----------
   if (step === "verify") {
     return (
-      <div className="auth-page">
+      <AuthLayout>
         <form className="auth-card" onSubmit={handleVerify}>
           <h1>Verify Your Email</h1>
           <p className="auth-subtitle">
@@ -141,13 +142,13 @@ function Signup() {
             </button>
           </p>
         </form>
-      </div>
+      </AuthLayout>
     );
   }
 
   // ---------- Signup form ----------
   return (
-    <div className="auth-page">
+    <AuthLayout>
       <form className="auth-card" onSubmit={handleSubmit}>
         <Link to="/" className="auth-back">← Back to Home</Link>
         <h1>Create Account</h1>
@@ -209,7 +210,7 @@ function Signup() {
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }
 

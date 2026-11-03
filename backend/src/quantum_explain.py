@@ -1,4 +1,4 @@
-﻿import base64
+import base64
 import numpy as np
 import cv2
 import torch
@@ -11,6 +11,33 @@ from predict import feature_extractor, scaler, model, device, CLASS_NAMES, IMG_S
 PATCH_SIZE = 74
 STRIDE = 74
 OCCLUSION_COLOR = 0
+
+
+def _region_label(center_y, center_x, img_size):
+    """Coarse 3x3 position label based on where the most influential patch sits,
+    described purely by image position — not a claimed anatomical structure."""
+    frac_y = center_y / img_size
+    frac_x = center_x / img_size
+
+    if frac_y < 1 / 3:
+        row = "upper"
+    elif frac_y < 2 / 3:
+        row = "middle"
+    else:
+        row = "lower"
+
+    if frac_x < 1 / 3:
+        col = "left"
+    elif frac_x < 2 / 3:
+        col = "center"
+    else:
+        col = "right"
+
+    if row == "middle" and col == "center":
+        return "central"
+    if col == "center":
+        return f"{row}-center"
+    return f"{row}-{col}"
 
 
 def generate_explanation(image_path):
@@ -55,9 +82,16 @@ def generate_explanation(image_path):
         batch_probs = torch.softmax(batch_output, dim=1)
         occluded_confs = batch_probs[:, predicted_class].cpu().numpy()
 
-    # --- Build heatmap from the batched results ---
+    # --- Build heatmap from the batched results, and find the most influential patch ---
     heatmap = np.zeros((IMG_SIZE, IMG_SIZE), dtype=np.float32)
     count_map = np.zeros((IMG_SIZE, IMG_SIZE), dtype=np.float32)
+
+    drops = baseline_conf - occluded_confs
+    top_idx = int(np.argmax(drops))
+    top_y, top_x = coords[top_idx]
+    focus_region = _region_label(
+        top_y + PATCH_SIZE / 2, top_x + PATCH_SIZE / 2, IMG_SIZE
+    )
 
     for (y, x), occluded_conf in zip(coords, occluded_confs):
         drop = baseline_conf - float(occluded_conf)
@@ -95,5 +129,6 @@ def generate_explanation(image_path):
         "tumor": tumor,
         "confidence": confidence,
         "heatmap": heatmap_data_uri,
-        "probabilities": probability_breakdown
+        "probabilities": probability_breakdown,
+        "focus_region": focus_region
     }

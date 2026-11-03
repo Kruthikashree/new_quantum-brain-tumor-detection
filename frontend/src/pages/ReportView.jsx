@@ -37,8 +37,6 @@ function ReportView() {
       .catch((err) => setError(err.response?.data?.error || "Could not load the report."));
   }, [id]);
 
-  
-
   const download = async () => {
     setError("");
     try {
@@ -57,6 +55,7 @@ function ReportView() {
   const tumor = report?.result?.tumor;
   const color = TUMOR_COLORS[tumor] || "#2563eb";
   const isLab = user?.role === "lab";
+  const isNegative = tumor === "No Tumor";
 
   return (
     <PortalLayout title="MRI Analysis Report" subtitle="AI-assisted analysis for physician review">
@@ -102,7 +101,7 @@ function ReportView() {
 
             {report.result ? (
               <>
-                                <div className="result-hero" style={{ borderColor: color + "40", background: color + "0d" }}>
+                <div className="result-hero" style={{ borderColor: color + "40", background: color + "0d" }}>
                   <div className="result-hero-label">AI PREDICTION</div>
                   <div className="result-hero-badge" style={{ background: color + "20", color }}>
                     {tumor || "-"}
@@ -143,9 +142,9 @@ function ReportView() {
                           ⓘ
                           <div className="heatmap-tooltip">
                             <p className="heatmap-tooltip-note">
-                              Highlighted regions show where the AI focused
-                              when making this prediction — not a confirmed
-                              tumor location.
+                              {isNegative
+                                ? "Highlighted regions show where the AI found evidence of normal tissue, supporting a No Tumor result — not a sign of abnormality."
+                                : "Highlighted regions show where the AI found evidence supporting the predicted tumor type — not a confirmed tumor location."}
                             </p>
                             <div className="legend-item">
                               <span className="legend-swatch" style={{ background: "linear-gradient(135deg,#ef4444,#f97316)" }}></span>
@@ -162,7 +161,11 @@ function ReportView() {
                           </div>
                         </span>
                       </div>
-                      <HeatmapExplorer src={report.result.heatmap} alt="Regions that influenced the prediction" />
+                      <HeatmapExplorer
+                        src={report.result.heatmap}
+                        alt="Regions that influenced the prediction"
+                        isNegative={isNegative}
+                      />
                     </div>
                   )}
                 </div>

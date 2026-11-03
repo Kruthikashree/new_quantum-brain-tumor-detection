@@ -1,29 +1,31 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import "./HeatmapExplorer.css";
 
-function classifyPixel(r, g, b) {
+function classifyPixel(r, g, b, isNegative) {
   const brightness = (r + g + b) / 3;
+  const suffix = isNegative ? " of normal tissue" : " for this tumor type";
 
+  // Very dark background (the navy backdrop, no overlay tint)
   if (brightness < 35 && Math.abs(r - b) < 15) {
     return { label: "Background", detail: "No AI attention in this area" };
   }
 
-  const warm = r - b;
+  const warm = r - b;   // positive = reddish, negative = bluish
   const greenish = g - Math.min(r, b);
 
-  if (warm > 20 && r >= g) {
-    return { label: "High influence", detail: "Strongly influenced this prediction" };
+  if (warm > 25 && r > g) {
+    return { label: "High influence", detail: `Strong evidence${suffix}` };
   }
-  if (greenish > 10 && g >= b) {
-    return { label: "Moderate influence", detail: "Partially influenced this prediction" };
+  if (warm > 10 && greenish > 10) {
+    return { label: "Moderate influence", detail: `Some evidence${suffix}` };
   }
-  if (b - r > 10) {
+  if (b - r > 15) {
     return { label: "Low influence", detail: "Minimal effect on this prediction" };
   }
   return { label: "Brain tissue", detail: "Outside the highlighted attention regions" };
 }
 
-function HeatmapExplorer({ src, alt }) {
+function HeatmapExplorer({ src, alt, isNegative }) {
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
@@ -72,7 +74,7 @@ function HeatmapExplorer({ src, alt }) {
 
     try {
       const data = canvas.getContext("2d").getImageData(px, py, 1, 1).data;
-      const info = classifyPixel(data[0], data[1], data[2]);
+      const info = classifyPixel(data[0], data[1], data[2], isNegative);
       setTooltip({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
